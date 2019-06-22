@@ -2,7 +2,7 @@
 
 View Source: [contracts/Holder.sol](../contracts/Holder.sol)
 
-**↗ Extends: [CustomPausable](CustomPausable.md), [Reclaimable](Reclaimable.md)**
+**↗ Extends: [Reclaimable](Reclaimable.md)**
 
 **Holder**
 
@@ -41,7 +41,7 @@ mapping(address => mapping(address => struct Holder.HoldingInfo)) internal _hold
 Deposit the tokens into this contract. Before using this function, you need to first approve this contract to receive the tokens.
 
 ```js
-function deposit(address token, uint256 releaseDate) external nonpayable
+function deposit(address token, uint256 releaseDate) external nonpayable whenNotPaused 
 returns(bool)
 ```
 
@@ -61,7 +61,7 @@ Returns true if the operation was successful.
 Withdraw your tokens from this contract.
 
 ```js
-function withdraw(address token, uint256 amount) external nonpayable
+function withdraw(address token, uint256 amount) external nonpayable whenNotPaused 
 returns(bool)
 ```
 

@@ -3,7 +3,7 @@
 View Source: [contracts/CustomPausable.sol](../contracts/CustomPausable.sol)
 
 **↗ Extends: [CustomAdmin](CustomAdmin.md)**
-**↘ Derived Contracts: [Holder](Holder.md), [Reclaimable](Reclaimable.md)**
+**↘ Derived Contracts: [Reclaimable](Reclaimable.md)**
 
 **CustomPausable**
 

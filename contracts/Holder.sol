@@ -16,17 +16,14 @@ limitations under the License.
 
 pragma solidity >=0.4.21 <0.6.0;
 
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
-import "./CustomPausable.sol";
 import "./Reclaimable.sol";
 
 ///@title Simple Token
 ///@author Binod Nirvan
 ///@notice Asset holder contract.
-contract Holder is CustomPausable, Reclaimable {
+contract Holder is Reclaimable {
   using SafeMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeERC20 for ERC20;
 
   struct HoldingInfo {
     uint256 amount;
@@ -40,10 +37,10 @@ contract Holder is CustomPausable, Reclaimable {
   ///@return Returns true if the operation was successful.
   ///@param token The address of ERC20 token you want to deposit.
   ///@param releaseDate The timestamp in unix epoch when you want to be able to receive the funds back.
-  function deposit(address token, uint256 releaseDate) external returns(bool) {
+  function deposit(address token, uint256 releaseDate) external whenNotPaused returns(bool) {
     require(_holdings[token][msg.sender].amount == 0, "Sorry, you may only deposit a token once.");
 
-    IERC20 erc20 = IERC20(token);
+    ERC20 erc20 = ERC20(token);
     uint256 allowance = erc20.allowance(msg.sender, address(this));
 
     require (allowance > 0, "You haven't approved any tokens for this contract to receive.");
@@ -60,12 +57,12 @@ contract Holder is CustomPausable, Reclaimable {
   ///@return Returns true if the operation was successful.
   ///@param token The address of ERC20 token you want to withdraw.
   ///@param amount The amount you want to withdraw.
-  function withdraw(address token, uint256 amount) external returns(bool) {
+  function withdraw(address token, uint256 amount) external whenNotPaused returns(bool) {
     HoldingInfo memory info = _holdings[token][msg.sender];
     uint256 available = releasableBalanceOf(info);
     require(available >= amount, "You don't have sufficient funds to transfer amount that large.");
 
-    IERC20 erc20 = IERC20(token);
+    ERC20 erc20 = ERC20(token);
 
     _holdings[token][msg.sender].amount = _holdings[token][msg.sender].amount.sub(amount);
 

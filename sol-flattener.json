@@ -1,6 +1,6 @@
 {
-  "source": "./contracts/.sol",
-  "destination": "./.flattened/.sol",
+  "source": "./contracts/Holder.sol",
+  "destination": "./flattened/Holder.sol",
   "search": "./,../node_modules",
   "removeRedundantEmptyLines": false
 }

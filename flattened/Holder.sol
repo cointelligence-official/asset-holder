@@ -894,6 +894,8 @@ contract Holder is Reclaimable {
 
   //token -> beneficiary -> info
   mapping(address => mapping(address=> HoldingInfo)) _holdings;
+  //beneficiary -> info
+  mapping(address => HoldingInfo) _etherHoldings;
 
   ///@notice Deposit the tokens into this contract. Before using this function, you need to first approve this contract to receive the tokens.
   ///@return Returns true if the operation was successful.
@@ -912,7 +914,7 @@ contract Holder is Reclaimable {
     _holdings[token][msg.sender].amount = _holdings[token][msg.sender].amount.add(allowance);
     _holdings[token][msg.sender].releaseDate = releaseDate;
 
-    return false;
+    return true;
   }
 
   ///@notice Withdraw your tokens from this contract.
@@ -922,7 +924,7 @@ contract Holder is Reclaimable {
   function withdraw(address token, uint256 amount) external whenNotPaused returns(bool) {
     HoldingInfo memory info = _holdings[token][msg.sender];
     uint256 available = releasableBalanceOf(info);
-    require(available >= amount, "You don't have sufficient funds to transfer amount that large.");
+    require(available >= amount, "You don't have sufficient funds to withdraw amount that large.");
 
     ERC20 erc20 = ERC20(token);
 
@@ -933,11 +935,37 @@ contract Holder is Reclaimable {
     return true;
   }
 
+  ///@notice Accepts incoming funds
+  ///@param releaseDate The date when you want to unlock your Ether.
+  ///@return Returns true if the operation was successful.
+  function depositEther(uint256 releaseDate) external payable whenNotPaused returns(bool) {
+    require(_etherHoldings[msg.sender].amount == 0, "Sorry, you may only deposit Ether once.");
+
+    _etherHoldings[msg.sender].amount = msg.value;
+    _etherHoldings[msg.sender].releaseDate = releaseDate;
+
+    return true;
+  }
+
+  ///@notice Withdraw Ether
+  ///@param amount Amount of Ether to withdraw in wei value.
+  ///@return Returns true if the operation was successful.
+  function withdrawEther(uint256 amount) external whenNotPaused returns(bool) {
+    uint256 available = releasableEtherBalanceOf(msg.sender);
+    require(available >= amount, "You don't have sufficient funds to withdraw amount that large.");
+
+    _etherHoldings[msg.sender].amount = _etherHoldings[msg.sender].amount.sub(amount);
+
+    msg.sender.transfer(amount);
+
+    return true;
+  }
+
   ///@notice Get the balance of the ERC20 contract for the specified account.
   ///@return Returns the balance of the ERC20 token held by the account.
   ///@param token Address of the ERC20 contract.
   ///@param account The address of the account for which the balance is being requested.
-  function tokenBalanceOf(address token, address account) external view returns(uint256) {
+  function tokenBalanceOf(address token, address account) public view returns(uint256) {
     return _holdings[token][account].amount;
   }
 
@@ -945,7 +973,7 @@ contract Holder is Reclaimable {
   ///@return Returns the locked balance of the ERC20 token held by this account.
   ///@param token Address of the ERC20 contract.
   ///@param account The address of the account for which the locked balance is being requested.
-  function lockedBalanceOf(address token, address account) external view returns(uint256) {
+  function lockedBalanceOf(address token, address account) public view returns(uint256) {
     return lockedBalanceOf(_holdings[token][account]);
   }
 
@@ -953,8 +981,29 @@ contract Holder is Reclaimable {
   ///@return Returns the releasable balance of the ERC20 token held by this account.
   ///@param token Address of the ERC20 contract.
   ///@param account The address of the account for which the releasable balance is being requested.
-  function releasableBalanceOf(address token, address account) external view returns(uint256) {
+  function releasableBalanceOf(address token, address account) public view returns(uint256) {
     return releasableBalanceOf(_holdings[token][account]);
+  }
+
+  ///@notice Get the ether balance of the specified account.
+  ///@return Returns the ether balance held by the account.
+  ///@param account The address of the account for which the balance is being requested.
+  function etherBalanceOf(address account) public view returns(uint256) {
+    return _etherHoldings[account].amount;
+  }
+
+  ///@notice Get the locked ether balance of the specified account.
+  ///@return Returns the locked ether balance of the specified account.
+  ///@param account The address of the account for which the locked balance is being requested.
+  function lockedEtherBalanceOf(address account) public view returns(uint256) {
+    return lockedBalanceOf(_etherHoldings[account]);
+  }
+
+  ///@notice Get the releasable ether balance of the specified account.
+  ///@return Returns the releasable ether balance of the requested account.
+  ///@param account The address of the account for which the releasable balance is being requested.
+  function releasableEtherBalanceOf(address account) public view returns(uint256) {
+    return releasableBalanceOf(_etherHoldings[account]);
   }
 
   function releasableBalanceOf(HoldingInfo memory info) private view returns(uint256) {

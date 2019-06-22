@@ -23,6 +23,7 @@ struct HoldingInfo {
 
 ```js
 mapping(address => mapping(address => struct Holder.HoldingInfo)) internal _holdings;
+mapping(address => struct Holder.HoldingInfo) internal _etherHoldings;
 
 ```
 
@@ -30,9 +31,14 @@ mapping(address => mapping(address => struct Holder.HoldingInfo)) internal _hold
 
 - [deposit(address token, uint256 releaseDate)](#deposit)
 - [withdraw(address token, uint256 amount)](#withdraw)
+- [depositEther(uint256 releaseDate)](#depositether)
+- [withdrawEther(uint256 amount)](#withdrawether)
 - [tokenBalanceOf(address token, address account)](#tokenbalanceof)
 - [lockedBalanceOf(address token, address account)](#lockedbalanceof)
 - [releasableBalanceOf(address token, address account)](#releasablebalanceof)
+- [etherBalanceOf(address account)](#etherbalanceof)
+- [lockedEtherBalanceOf(address account)](#lockedetherbalanceof)
+- [releasableEtherBalanceOf(address account)](#releasableetherbalanceof)
 - [releasableBalanceOf(struct Holder.HoldingInfo info)](#releasablebalanceof)
 - [lockedBalanceOf(struct Holder.HoldingInfo info)](#lockedbalanceof)
 
@@ -76,12 +82,50 @@ Returns true if the operation was successful.
 | token | address | The address of ERC20 token you want to withdraw. | 
 | amount | uint256 | The amount you want to withdraw. | 
 
+### depositEther
+
+Accepts incoming funds
+
+```js
+function depositEther(uint256 releaseDate) external payable whenNotPaused 
+returns(bool)
+```
+
+**Returns**
+
+Returns true if the operation was successful.
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| releaseDate | uint256 | The date when you want to unlock your Ether. | 
+
+### withdrawEther
+
+Withdraw Ether
+
+```js
+function withdrawEther(uint256 amount) external nonpayable whenNotPaused 
+returns(bool)
+```
+
+**Returns**
+
+Returns true if the operation was successful.
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| amount | uint256 | Amount of Ether to withdraw in wei value. | 
+
 ### tokenBalanceOf
 
 Get the balance of the ERC20 contract for the specified account.
 
 ```js
-function tokenBalanceOf(address token, address account) external view
+function tokenBalanceOf(address token, address account) public view
 returns(uint256)
 ```
 
@@ -101,7 +145,7 @@ Returns the balance of the ERC20 token held by the account.
 Get the locked balance of the ERC20 contract for the specified account.
 
 ```js
-function lockedBalanceOf(address token, address account) external view
+function lockedBalanceOf(address token, address account) public view
 returns(uint256)
 ```
 
@@ -121,7 +165,7 @@ Returns the locked balance of the ERC20 token held by this account.
 Get the releasable balance of the ERC20 contract for the specified account.
 
 ```js
-function releasableBalanceOf(address token, address account) external view
+function releasableBalanceOf(address token, address account) public view
 returns(uint256)
 ```
 
@@ -134,6 +178,63 @@ Returns the releasable balance of the ERC20 token held by this account.
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
 | token | address | Address of the ERC20 contract. | 
+| account | address | The address of the account for which the releasable balance is being requested. | 
+
+### etherBalanceOf
+
+Get the ether balance of the specified account.
+
+```js
+function etherBalanceOf(address account) public view
+returns(uint256)
+```
+
+**Returns**
+
+Returns the ether balance held by the account.
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| account | address | The address of the account for which the balance is being requested. | 
+
+### lockedEtherBalanceOf
+
+Get the locked ether balance of the specified account.
+
+```js
+function lockedEtherBalanceOf(address account) public view
+returns(uint256)
+```
+
+**Returns**
+
+Returns the locked ether balance of the specified account.
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| account | address | The address of the account for which the locked balance is being requested. | 
+
+### releasableEtherBalanceOf
+
+Get the releasable ether balance of the specified account.
+
+```js
+function releasableEtherBalanceOf(address account) public view
+returns(uint256)
+```
+
+**Returns**
+
+Returns the releasable ether balance of the requested account.
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
 | account | address | The address of the account for which the releasable balance is being requested. | 
 
 ### releasableBalanceOf
